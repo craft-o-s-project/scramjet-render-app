@@ -5,7 +5,7 @@
 	"type": "module",
 	"engines": {
 		"npm": ">=7.0.0",
-		"node": ">=16.0.0"
+		"node": ">=20.0.0"
 	},
 	"scripts": {
 		"start": "node src/index.js",
@@ -21,9 +21,9 @@
 	"dependencies": {
 		"fastify": "^5.7.4",
 		"@fastify/static": "^9.0.0",
-		"@mercuryworkshop/bare-mux": "^2.1.9",
-		"@mercuryworkshop/libcurl-transport": "^1.5.2",
-		"@mercuryworkshop/scramjet": "https://github.com/MercuryWorkshop/scramjet/releases/download/v1.1.0/mercuryworkshop-scramjet-1.1.0.tgz",
+		"@mercuryworkshop/libcurl-transport": "2.0.5",
+		"@mercuryworkshop/scramjet": "https://github.com/MercuryWorkshop/scramjet/releases/download/v2.0.67-alpha.1/mercuryworkshop-scramjet-2.0.67-alpha.1.tgz",
+		"@mercuryworkshop/scramjet-controller": "https://github.com/MercuryWorkshop/scramjet/releases/download/v2.0.67-alpha.1/mercuryworkshop-scramjet-controller-0.0.13.tgz",
 		"@mercuryworkshop/wisp-js": "^0.4.1",
 		"ws": "^8.18.3"
 	},

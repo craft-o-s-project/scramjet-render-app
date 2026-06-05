@@ -1,15 +1,20 @@
 import { createServer } from "node:http";
-import { fileURLToPath } from "url";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { hostname } from "node:os";
 import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
-import { libcurlPath } from "@mercuryworkshop/libcurl-transport";
-import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
+const controllerPath = dirname(
+	fileURLToPath(import.meta.resolve("@mercuryworkshop/scramjet-controller"))
+);
+const libcurlPath = dirname(
+	fileURLToPath(import.meta.resolve("@mercuryworkshop/libcurl-transport"))
+);
 
 // Wisp Configuration: Refer to the documentation at https://www.npmjs.com/package/@mercuryworkshop/wisp-js
 
@@ -53,8 +58,8 @@ fastify.register(fastifyStatic, {
 });
 
 fastify.register(fastifyStatic, {
-	root: baremuxPath,
-	prefix: "/baremux/",
+	root: controllerPath,
+	prefix: "/controller/",
 	decorateReply: false,
 });
 

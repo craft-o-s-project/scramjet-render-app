@@ -20,45 +20,58 @@ const error = document.getElementById("sj-error");
  */
 const errorCode = document.getElementById("sj-error-code");
 
-const { ScramjetController } = $scramjetLoadController();
+const { Controller, config } = $scramjetController;
 
-const scramjet = new ScramjetController({
-	files: {
-		wasm: "/scram/scramjet.wasm.wasm",
-		all: "/scram/scramjet.all.js",
-		sync: "/scram/scramjet.sync.js",
-	},
-});
+config.injectPath = "/controller/controller.inject.js";
+config.scramjetPath = "/scram/scramjet.js";
+config.wasmPath = "/scram/scramjet.wasm";
 
-scramjet.init();
-
-const connection = new BareMux.BareMuxConnection("/baremux/worker.js");
+let controllerPromise;
 
 form.addEventListener("submit", async (event) => {
 	event.preventDefault();
-
-	try {
-		await registerSW();
-	} catch (err) {
-		error.textContent = "Failed to register service worker.";
-		errorCode.textContent = err.toString();
-		throw err;
-	}
+	error.textContent = "";
+	errorCode.textContent = "";
 
 	const url = search(address.value, searchEngine.value);
 
-	let wispUrl =
+	try {
+		const controller = await getController();
+		const frame = controller.createFrame();
+		frame.element.id = "sj-frame";
+		document.body.appendChild(frame.element);
+		frame.go(url);
+	} catch (err) {
+		error.textContent = "Failed to launch Scramjet.";
+		errorCode.textContent = err?.stack || err?.toString() || String(err);
+		throw err;
+	}
+});
+
+async function getController() {
+	if (!controllerPromise) {
+		controllerPromise = initController().catch((err) => {
+			controllerPromise = undefined;
+			throw err;
+		});
+	}
+
+	return controllerPromise;
+}
+
+async function initController() {
+	const serviceworker = await registerSW();
+	const wispUrl =
 		(location.protocol === "https:" ? "wss" : "ws") +
 		"://" +
 		location.host +
 		"/wisp/";
-	if ((await connection.getTransport()) !== "/libcurl/index.mjs") {
-		await connection.setTransport("/libcurl/index.mjs", [
-			{ websocket: wispUrl },
-		]);
-	}
-	const frame = scramjet.createFrame();
-	frame.frame.id = "sj-frame";
-	document.body.appendChild(frame.frame);
-	frame.go(url);
-});
+	const transport = new LibcurlTransport.LibcurlClient({ wisp: wispUrl });
+	const controller = new Controller({
+		serviceworker,
+		transport,
+	});
+
+	await controller.wait();
+	return controller;
+}
